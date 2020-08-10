@@ -1,0 +1,697 @@
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#
+#                             Meta Information
+#                            __________________
+# 
+#
+# Header:
+#
+#    Program:  “SpxSeasonMonthPeg”
+#    Purpose:  Pegging the seasonal waves of the S&P Index by month.
+#
+#    Copyright © 2020  Kenwave.com and MintKit.com 
+#
+#
+# MIT Mode of License:
+#
+# Permission is hereby granted, free of charge, to any person obtaining a 
+# copy of this software and associated documentation files (the “Software”),
+# to deal in the Software without restriction, including without limitation 
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+# and/or sell copies of the Software, and to permit persons to whom the 
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHOR(S) OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+# DEALINGS IN THE SOFTWARE.
+#
+#
+#=== Prime Reference for the Program:
+#
+#    Duplex Models of Complex Systems: 
+#    Binomial Framework and Case Study of  
+#    Seasonal Waves in the Stock Market
+#    (Kim, 2020)
+#
+# The program here serves as the groundwork for the guidebook named above. 
+# The same code sets the stage for a series of derivative programs and 
+# publications in the future. 
+#
+#
+#=== Keywords:
+#
+#    Duplex, Complex Systems, Binomial Test, Markets, Models, Stocks, 
+#    Waves, Cycles, Efficiency, EMH, Random Walk, R, Program, Code, 
+#    S&P Index, Finance, Economics, Nonparametric Statistics
+#    
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+############################################################################
+#
+#
+#               Modeling Seasonal Patterns in the Stock Market
+#              ________________________________________________
+#  
+#
+#=== Objective
+#
+# To present a duplex framework for modeling complex systems with the  
+# utmost of simplicity, clarity and efficacy. The merits of the binary 
+# scheme arise, for instance, in dispelling the welter of myths and 
+# misconceptions in finance and economics. For this purpose, a springboard 
+# par excellence lies in the seasonal patterns of the stock market 
+# throughout the year. 
+#
+# The descriptive model spotlighted here refutes the ruling credo of 
+# efficient markets that lies at the heart of financial economics. For this 
+# purpose, the battery of disproofs centers on the subtle but recurrent 
+# waves in the stock market as showcased by the monthly returns of the S&P
+# 500 Index (SPX). 
+# 
+# A related task is to demonstrate the mettle of the R language along with
+# the software platform. The minimalist program shuns the use of advanced 
+# functions in R such as specialized commands meant to streamline the 
+# analysis of time-series data. Instead, the code employs only a tiny subset
+# of the inbuilt features within the kernel module – also known as “Base R” 
+# – of the software platform. 
+#
+# In short, this program encodes a trenchant model of the bourse through a 
+# lean set of functions in the R language coupled with the core module of 
+# the software engine. Despite its simplicity, the script conveys an 
+# intuitive and practical model of a complex system – namely, the stock
+# market – that has long confounded the mass of practitioners as well as 
+# researchers. A direct consequence is to uproot the hoary dogma of efficient
+# markets that undergirds the entire edifice of financial economics.
+# 
+#
+#=== Prime Reference for the Code
+# 
+# This document presents the program behind the ebook named in the Meta 
+# section above. The referent guidebook discusses the substantive issues 
+# behind the code, ranging from the choice of the dataset to the design of 
+# the assays. An example involves the logical flaws behind the Efficient 
+# Market Hypothesis or the key assumptions behind a statistical test.
+#
+# On the other hand, the ebook pays scant attention to logistic issues 
+# aside from some passing remarks such as the source of the dataset in 
+# cyberspace. A notable instance of the exclusion concerns the nitty-gritty 
+# of obtaining the raw data, or the assignment of the working directory for 
+# the R system. Instead, the administrative tasks are explained in detail in
+# the next section of the document in hand.
+# 
+# To sum up, the material aspects of the program are discussed in the ebook
+# for which the listing here serves as a capsule and a supplement. To curtail
+# redundancy, the statements in the following collation come with only a 
+# modicum of explanation. 
+# 
+# To complement the spartan narrative, however, the script below contains 
+# pointers in the form of headings that correspond to sundry sections within 
+# the ebook itself. In this way, the interested reader should refer to the 
+# guidebook for a full account of the weighty issues ranging from the logic 
+# behind the overall layout of the program to the motive behind specific
+# sections. 
+#
+#
+#=== Quirks of the Stock Market and Dataset
+# 
+# The case study centers on the S&P 500 Index, also known by the nickname of
+# SPX. The data series is available at Yahoo Finance, the favorite portal of 
+# the investing public. From a larger stance, a large stockpile of data in 
+# any domain is apt to contain entries that are incorrect, incomplete, 
+# misleading and/or inconsistent. The repository at Yahoo is no exception to 
+# the rule.
+#
+# On one hand, at least one form of idiosyncrasy at the Web site is doubtless
+# deliberate and intended as a convenience for the user. In particular, a 
+# dynamic display of the historical record for the SPX on a browser presents 
+# all the values to the accuracy of two decimal places. On the other hand,
+# a static file which is downloaded from the same portal lists the 
+# corresponding factoids up to the exactness of six decimal places.
+# 
+# Another type of peculiarity is a matter of expedience for the data 
+# provider. An example involves the record of daily prices for SPX. The 
+# initial portion of the dataset shows no fluctuation in price over the span 
+# of a single day. For instance, the very first record asserts that the Open,
+# High, Low, and Close values for 3 January 1950 all came out to 16.66 
+# points. We may infer from the uniform reading that something must be 
+# amiss. 
+#
+# Moreover, the lack of variation in the daily readings persists until the
+# end of 1961. In other words, the entries for the Open, High, Low, and 
+# Close attributes assume dissimilar values starting with the first day of 
+# trading in 1962. 
+# 
+# Given this backdrop, we may check the daily readings against a download 
+# of the weekly records from the same portal. For instance, the first full
+# week - meaning Monday through Friday - for the dataset begins on Monday, 
+# 9 January 1950. (Until August 1952, the U.S. stock market was open from 
+# Monday through Saturday; but the data from Yahoo ignores Saturdays and 
+# covers only the window from Monday to Friday each week.) Based on the 
+# daily records, the Open, High, Low, and Close values for that week were
+# 17.08, 17.09, 16.67, and 16.67 respectively.
+# 
+# In a downloaded file containing the data on a weekly basis, the pertinent 
+# record is the week starting on Sunday, January 8. The corresponding values
+# come out to 17.08, 17.09, 16.65, and 16.65 respectively. In a matchup 
+# against the previous paragraph, we see that the Open and High prices are 
+# identical. However, the Low values differ between the daily and weekly 
+# records by some 0.12 percent; the same is true for the Close entries.
+# 
+# To cite another example, we compare the weekly readings against the 
+# monthly ones. March 1950 was the first month in which the end of the month 
+# also comprised the end of a week. According to the roster of weekly data, 
+# the Open, High, Low, and Close values for the final week of that month 
+# were 17.459999, 17.530001, 17.290001, and 17.34 respectively. 
+# 
+# Meanwhile, a download of the monthly series shows that the extreme values
+# for March were 17.24, 17.610001, 17.07, and 17.290001 respectively. In 
+# particular, the monthly record states that the final value was 17.290001 
+# points. According to the weekly data from the last paragraph, however, the 
+# terminal value for the month was 17.34 points. In this way, the two 
+# versions differ by about 0.29 percent. 
+# 
+# We now turn to a download of the daily readings for the same month. 
+# According to this dataset, the Open, High, Low, and Close values during the
+# entire month were 17.24, 17.559999, 17.07, and 17.290001 respectively. 
+# Three of the latter four values match up precisely with their counterparts 
+# from the monthly record in the previous paragraph. The only exception is 
+# the High reading, which the daily sample states as 17.559999 points while 
+# the pertinent value from the monthly record is 17.610001 units. The 
+# difference amounts to some 0.28 percent. Such a discrepancy may be 
+# explained, at least in part, if the monthly series takes account of 
+# intraday prices while the daily readings peg only the final values at the
+# end of each day.
+# 
+# To recap, the data for the daily, weekly and monthly records tend to match 
+# up but are suspect and even inconsistent at times. From a different slant, 
+# Yahoo Finance resembles other purveyors of information in its custom of 
+# revising its offerings from time to time. An example involves the 
+# correction of an erroneous entry in a database; or an expansion of the 
+# records for a time series in the forward or backward direction. As a 
+# consequence, the results from the current study may differ somewhat from 
+# those to be obtained in the future depending on the revisions made to the 
+# repository in the interim. This type of caveat applies, of course, to any 
+# database in any domain along with its appraisal.
+# 
+# In these and other ways, we ought to keep in mind the quirky aspects of
+# any dataset under review. The jumble of hang-ups presented above would 
+# come to the fore, for instance, if the program here were to be adapted in 
+# the future for use with a dataset containing daily or weekly records.
+#
+# On the other hand, the issues aired in this section are for the most part 
+# generic matters that do not apply to the current study in particular. That 
+# is, the pitfalls play little or no role here since we focus solely on the 
+# terminal values of the SPX on a monthly basis. All we require for a 
+# worthwhile assay is the reasonable premise that the closing values of the
+# monthly readings display a modicum of accuracy. From a different angle, 
+# even a fixed and systematic bias to the upside or downside on a percentage
+# basis would result in conclusions that prove to be just as valid. 
+#
+#
+#===========================================================================
+#
+#
+#                            Prep for Startup 
+#                           __________________
+#
+#
+#
+#=== Set the Working Directory
+#
+# The first step is to specify the working directory for the input and output 
+# of data. When the R system starts up, it will select a directory for the 
+# files to be read and/or written. You may check the current location of the 
+# working directory by issuing the following command:
+
+getwd()
+
+# The system will respond with a printout such as the following:
+#
+#    [1] "C:/Users/Myname/Documents"
+#
+# In the foregoing output, the tag of “[1]” denotes the first (and in this 
+# case, the only) item in the response provided by the system. The rest of 
+# the printout conveys the following information: the current directory is 
+# the Documents folder on the C drive of the user called Myname. 
+# 
+# If the folder chosen by the system is a suitable location for your files, 
+# then you may leave the setting alone and move on to the next step. 
+#    
+# On the other hand, suppose that you would like to use a different folder.
+# To illustrate, we will assume that you favor a directory named Testbed 
+# which you created in advance and placed on the Desktop. In that case, you
+# could issue a suitable instruction such as either of the following 
+# commands:
+#
+     setwd("../Desktop/Testbed")
+#    setwd("C:/Users/Myname/Desktop/Testbed")
+#
+# At most, only one of the foregoing commands should be used. In that case, 
+# the unused statement should be preceded by a hash mark (#) in order to 
+# denote it as a comment rather than an instruction to the R system. 
+#
+# After this step, you should confirm any change of location by running the 
+# “getwd()” command once more. From this point onward, we will assume that 
+# the current working directory has been set as you wish.
+#
+#
+#=== Fetch the Data
+# 
+# You may use a Web browser to obtain the historical data for the S&P Index 
+# from Yahoo Finance (finance.yahoo.com). The dataset desired is the record 
+# of monthly prices from January 1950 to January 2020. 
+#
+# In fetching the data, your computer will create a new file and place it 
+# in a directory called Downloads as the default choice of location. The new 
+# document is automatically given the name of “^GSPC.csv”. In displaying the 
+# file, however, your computer is likely to hide the extension that denotes 
+# the document type (“.csv”) and instead list the item more tersely as 
+# “^GSPC”. 
+#    
+# For the sake of convenience and decorum, we will make a couple of logistic 
+# tweaks. The first step is to modify the name of the file from “^GSPC” to a 
+# more descriptive label in the form of “SpxMonth1950-2020”.
+#    
+# If the current directory differs from the Downloads folder, then your next
+# task is to move the renamed file into the location specified earlier. The
+# switchover will simplify the task of fetching the contents from the R 
+# platform later on. 
+#    
+# By this juncture, the data file has been renamed and emplaced in the 
+# current working directory. The next step is to load the dataset into the 
+# R system.
+#
+#
+#=== Read in the Data
+#
+# After returning to the R platform, you may access the newborn file located 
+# in the working directory. The contents of this file should be read into a 
+# data frame called Raw. The latter name features an initial capital letter 
+# to serve as a mnemonic that the given object is a full-fledged table rather
+# than a simpler construct such as a character string or a numeric vector. 
+#
+# On the other hand, exceptions to the naming convention may arise in the 
+# case of labels assigned by external parties. An example involves the
+# Boolean values of TRUE and FALSE which are built-in primitives of the R
+# system. Another instance concerns the column of closing values of the SPX 
+# which has been dubbed as Close by the compiler of the data.
+#
+# A simple way to copy the dataset into the current workspace is to issue the 
+# following command. 
+
+Raw = read.csv("SpxMonth1950-2020.csv")
+
+# If the system responds with an error message, the most likely cause is a
+# mismatch between the working directory and the location of the data file.
+# In that case, you should rectify the discrepancy. Depending on 
+# circumstances, the R engine may continue to issue rude messages. In that 
+# case, your best course is to shut down the system entirely. Next, 
+# confirm that the steps in the previous subsections have been taken 
+# properly, including the use of the “setwd()” command at most once. Then 
+# restart the system.
+#
+# At this stage, you should check that the dataset has been cloned correctly. 
+# You can use the following command to print out the first handful of rows:
+
+head(Raw)
+
+# You ought to do likewise for the last portion comprising half a dozen 
+# records:
+
+tail(Raw)
+
+# By this point, you have copied the contents of the external file into a
+# data frame called Raw then confirmed the result. You may now move on to 
+# the main task of analyzing the input.
+#
+#
+#___________________________________________________________________________
+#
+#
+#                               Body of Code
+#                              ______________
+#
+#
+# This section presents the body of the script behind the ebook named in 
+# the Meta section at the beginning of this document. The lines of code 
+# shown below, including the output of figures, appear in the same order as 
+# the results presented in the ebook.
+#
+# By this juncture, you should have taken the leadoff steps described in the 
+# previous section. In that case, the script as a whole represents a coherent 
+# program rather than a haphazard collection of snippets of code. For this 
+# reason, the entire program – including the statements discussed in the Prep
+# section above – may be executed in a single pass from the Editor pane of 
+# the R platform.
+# 
+# After such a run, an ancillary issue concerns the charts created by the 
+# system along the way. Suppose that you deployed the program while using a 
+# friendly interface such as the RStudio package; in that case, you may 
+# easily access the graphics by clicking on the arrows under the Plots tab of
+# the output pane. However, if you used only the kernel module (namely, Base
+# R) of the software platform to execute the script, then you should return 
+# to the Editor pane and rerun any of the plotting commands in order to view 
+# the attendant output.
+#
+# To round up, the script below underpins the research report. For each 
+# segment, you should refer to the corresponding section of the guidebook for 
+# a detailed explanation of the motive for the code as well as other vital 
+# issues such as the interpretation of the results.
+#
+#
+#---------------------------------------------------------------------------
+
+
+
+####  Code for Statistical Assays  #### 
+
+
+
+#=== Survey of the Data
+
+
+## Create Fig. 1: Monthly level of SPX from January 1950 to January 2020.
+
+plot(Raw$Close, type='l', col='magenta', xlab='Month', ylab='SPX')
+
+
+# To simplify access later on to the columns of the Raw table.
+
+attach(Raw)
+
+# Henceforth we may – for instance – refer to the vector of closing values 
+# in the Raw array as 'Close' rather than 'Raw$Close'.
+
+
+## Fig. 2: Log to base 10 of SPX by month over the entire timespan.
+
+plot(log10(Close),type='l',col='magenta',xlab='Month',ylab='Log of SPX')
+
+
+
+#=== Gauging the Monthly Returns
+
+
+# Number of monthly returns (n) equals 1 less than the number of records 
+# in Raw. The length of the Raw table is the same as that of the Close 
+# column.
+
+len = length(Close)
+n = len - 1
+
+
+# Create the adjunct table wherein each record contains the date plus the 
+# closing values for this month and the next.
+
+A = cbind(Date[1:n], Close[1:n], Close[2:len])
+
+
+# Check that the table has been formed properly by printing the first three
+# records; and likewise for the last triad.
+
+head(A,3)
+tail(A,3)
+
+
+# Form the vector of monthly returns, in percent, for each record in table A. 
+
+ret = 100 * ( A[ , 3] - A[ , 2] ) / A[ , 2]
+
+
+## Fig. 3: Forward monthly return for SPX from 1950 to 2019.
+## The closing price in January 2020 is used in pegging the forward return 
+## at the end of December 2019.
+
+plot(ret, type='l', col='magenta', xlab='Month', ylab='Return (%)')
+
+
+# The B board will serve as a baseline or backbone for further analysis.
+
+B = data.frame(Date[1:n], Close[1:n], ret)
+
+
+# Verify the B board.
+
+head(B,3)
+tail(B, 3)
+
+
+
+#=== Crafting the Descriptive Models
+
+
+# Calculate the magnification factor (wax) for the price level over the 
+# entire timeline. Then find the geometric mean of the rate of ascent, 
+# in percent per month, and print it out.
+
+wax = A[n,3] / A[1,2]
+gm.wax = wax^(1/n)
+gm.r = 100 * (gm.wax - 1)
+gm.r
+
+
+# Form the C cache to serve as the substrate for gleaning the monthly gains 
+# on average. Each row of the matrix represents a given year, while each
+# column reflects the pertinent month of the year.
+ 
+C = matrix(ret, ncol=12, byrow=TRUE)
+
+
+# Confirm the C cache by printing the first three records; and likewise
+# for the last triplex.
+
+head(C, 3)
+tail(C, 3)
+
+
+# Find the MEAN value of each column to get the vector of monthly gains.
+
+zig = colMeans(C)
+
+
+## Fig. 4: Mean return for each month of the year.
+
+plot(1:12,zig,type='b',col='blue',xlab='Month',ylab='Return (%)')
+abline(h = 0, col='red')  # Draw a horizontal, red line through the origin.
+
+
+## Fig. 5: Boxplot of forward monthly returns.
+
+bp = boxplot(C, col='yellow', xlab='Month', ylab='Return (%)')
+bp           # Print out the contents of bp.
+
+
+# Extract the row of MEDIAN values from the “stats” module in bp.
+
+zag = bp$stats[3, ]
+
+
+# Find the absolute values of the errors due to the zig and zag vectors.
+
+aeZig = abs(ret - zig)
+aeZag = abs(ret - zag)
+
+
+# Get the MEAN of the absolute values of the errors due to the zig 
+# as well as zag vectors.
+
+mean(aeZig); mean(aeZag) 
+
+
+# Do likewise for the MEDIAN of the absolute values of the errors due to 
+# the zig as well as zag arrays.
+
+median(aeZig); median(aeZag)
+
+
+# Form the vector of errors for each of the Idle, Drift, and Sway Models.
+
+eI = ret
+eD = ret - gm.r
+eS = ret - zag
+
+
+## Fig. 6: Boxplots of errors by model.
+
+boxplot(eI, eD, eS, names=c('Idle','Drift','Sway'),
+        ylab= 'Return (%)', col=c('orange','yellow','green'))
+
+
+# Find the variance of the errors for each of the Idle, Drift, and 
+# Sway Models.
+
+var(eI) ; var(eD) ; var(eS)
+
+
+# Get the absolute values of the errors for each Model.
+
+aeI = abs(eI) 
+aeD = abs(eD) 
+aeS = abs(eS)
+
+
+# Find the MEAN of the absolute values of the errors for each Model.
+
+mean(aeI) ; mean(aeD) ; mean(aeS)
+
+
+# Get the MEDIAN of the absolute values of the errors for each template.
+
+mad(eI, constant=1) ; mad(eD, constant=1) ; mad(eS, constant=1)
+
+# In each command above, an argument called “constant” has been set to 1. 
+# This clause ensures that the results of the computation are better suited
+# to our current assay. As a counterpoint, suppose that the “constant” 
+# modifier had been omitted from the foregoing decrees. In that case, the 
+# “mad” routine would have applied a scaling factor of 1.4826. More 
+# precisely, a plain command of the form “mad(eI)” would be equivalent to 
+# the following diktat: “1.4826 * mad(eI, constant=1)”.
+#
+# The multiplier of 1.4826 serves to calibrate the MAD value against the 
+# standard deviation (SD) of the sample. The rationale is as follows. The 
+# expected value of the boosted version of the MAD statistic — that is, 
+# after multiplication by 1.4826 — equals the standard deviation if the 
+# sample were to come from a normal distribution (Leys, 2013; Ruppert, 2010).
+#
+# From a pragmatic stance, then, the bulked-up result would be apropos if we
+# wanted to compare the output of the “mad” command directly to the standard 
+# deviation of the sample. (From a larger stance, the SD may serve as a 
+# proxy for the root mean square of the errors whether or not the data 
+# happen to spring from a Gaussian ogive.) At this stage, we wish to assess 
+# the mean level of the absolute error as well as the MAD value against the 
+# standard deviation. For this reason, we use the plain value of MAD rather 
+# than its boosted version.
+
+
+# For each Model, find the ratio of the MEAN of the absolute errors to the 
+# SD of the errors; and likewise the quotient of the MAD to the SD. 
+
+mean(aeI)/sd(eI); mad(eI, constant=1)/sd(eI)
+mean(aeD)/sd(eD); mad(eD, constant=1)/sd(eD)
+mean(aeS)/sd(eS); mad(eS, constant=1)/sd(eS)
+
+
+
+#=== Overall Direction of Movement
+
+
+# Check whether each element of ret is positive. Then compute nUp: the number
+# of positive values in the ret vector.
+
+boolUp = ret > 0
+iUp = as.integer(boolUp) 
+nUp = sum(iUp)
+
+
+# Assess the Idle Model for which the null hypothesis posits equal odds of 
+# moving upward or not. The checkup entails a two-tailed binomial test.
+
+binom.test(nUp, n, p = 0.5, alternative = "two.sided")
+
+
+# Find nUpD, the number of positive entries in the error vector eD; we make 
+# use of the fact that the “sum()” function adds up the number of TRUE 
+# entries when its argument is a vector of Boolean values. Then we match the 
+# result against n, the total number of cases, to conduct a binomial test
+# of proportions for the Drift template.
+
+nUpD = sum(eD > 0)
+binom.test(nUpD, n, p = 0.5, alt = "two.sided")
+
+
+# Do likewise for the error vector eS, and thereby vet the Sway Model.
+
+nUpS = sum(eS > 0)
+binom.test(nUpS, n, p = 0.5, alt = "two.sided")
+
+
+
+#=== Global Score of Errors
+
+
+# First, compare each error in the aeD vector against its counterpart
+# in aeI. Then use winDI, the number of wins (meaning smaller absolute 
+# errors) for the Drift Model against the Idle version, along with the 
+# number of cases, to conduct a one-sided test for superior performance. 
+
+winDI = aeD < aeI
+nwinDI = sum(winDI)
+binom.test(nwinDI, n, p = 0.5, alt = "greater")
+
+
+# Do likewise in testing the aeS vector against aeI. In this way, we check
+# whether the Sway Model trumps the Idle icon.
+
+nwinSI = sum(aeS < aeI)
+binom.test(nwinSI, n, p = 0.5, alt = "greater")
+
+
+# And once more for the aeS vector against the aeD.
+
+nwinSD = sum(aeS < aeD)
+binom.test(nwinSD, n, p = 0.5, alt = "greater")
+
+
+
+#=== Intra-year Warp of Direction
+
+
+# Count the number of upturns for October as well as August. The second
+# statement below uses the fact that the “sum” command performs the
+# “as.integer()” function automatically when the argument represents a 
+# vector of Boolean values.
+
+nOct = sum(as.integer(C[ ,10] > 0))
+nAug = sum(C[ ,8] > 0)               
+
+
+# Get the number of years as one-twelfth of the count of cases.
+ 
+nYear = n/12
+
+
+# Find the fraction of positive returns for October as well as August.
+# Then print out the results.
+
+fOct = nOct/nYear  
+fAug = nAug/nYear  
+fOct ; fAug
+
+
+# Perform a binomial test. The null hypothesis presumes that the two periods 
+# display equal prospects of moving higher, while the alternative premise 
+# avers that any discrepancy in the ratios is as likely to be positive as 
+# negative. The upshot is a two-tailed test of the proportions.
+
+binom.test(nOct, nYear, p = fAug, alt = "two.sided")
+
+
+
+#=== Intra-year Clash of Returns
+
+
+# Count the number of times that October trumps August in the same year.
+
+nOctWin = sum(C[ ,10] > C[ ,8])
+
+
+# Conduct a binomial test wherein the alternative hypothesis entails a 
+# one-tailed test to the upside.
+
+binom.test(nOctWin, nYear, p = 0.5, alt = "greater")
+
+
+
+###############################  End of Code  ###############################
