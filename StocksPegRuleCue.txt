@@ -1,0 +1,782 @@
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#
+#                             Meta Information
+#                            __________________
+# 
+#
+# Header:
+#
+#    Program:  “StocksPegRuleCue”
+#    Purpose:  Forecasting stocks via the PEG Rule plus earnings trends.
+#
+#    Copyright © 2021  Kenwave.com and MintKit.com 
+#
+#
+# MIT Mode of License:
+#
+# Permission is hereby granted, free of charge, to any person obtaining a 
+# copy of this software and associated documentation files (the “Software”),
+# to deal in the Software without restriction, including without limitation 
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+# and/or sell copies of the Software, and to permit persons to whom the 
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHOR(S) OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+# DEALINGS IN THE SOFTWARE.
+#
+#
+#=== Prime Reference for the Program:
+#
+#    Forecasting Stocks by Earnings Growth – 
+#    PEG Rule for Blending Price and Profit Trends
+#    (Kim, 2021)
+#
+# The program here captures the gist of the guidebook named above. 
+#
+#
+#=== Keywords:
+#
+#    Forecasting, Trends, Stocks, Price, Earnings, Ratio, Growth, PEG, 
+#    Markets, Models, R, Program, Code, Finance, Economics
+#    
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+############################################################################
+#
+#
+#                   Forecasting Stock Prices via PEG Gauge 
+#              ________________________________________________
+#  
+#
+#=== Objective
+#
+# To predict stock prices using the PEG gauge along with the likely growth 
+# of earnings going forward. The forecast draws on the estimates of profit
+# trends provided by financial analysts. 
+#
+# The ratio of price to earnings (PE) has long served as the mainstay for 
+# vetting a stock and casting its fate, but a far better cue lies in the 
+# PE relative to the likely growth in earnings. The compound yardstick, 
+# called the PEG gauge, provides a cogent way to predict stocks.
+#
+#
+#=== Prime Reference for the Code
+# 
+# The program below underpins the report named in the Meta section above.
+# The guidebook itself discusses the substantive issues behind the code, 
+# ranging from the choice of dataset to the reasoning behind the algorithm. 
+# An example involves the faulty custom of using the ratio of price to 
+# earnings (PE) as the mainstay for forecasting stock prices. Another 
+# instance concerns a simple way to regain some of the precision lost in the 
+# values of earnings per share (E) declared by data providers. 
+#
+# On the other hand, the guidebook pays scant attention to logistic issues 
+# aside from some passing remarks such as the source of the dataset in 
+# cyberspace. A notable case of exclusion concerns the nitty-gritty of 
+# reading in the raw data, or the assignment of the working directory for 
+# the R system. Instead, the administrative tasks are explained in detail in
+# the next section of the document in hand.
+# 
+# To sum up, the weighty aspects of the program are discussed in the ebook 
+# for which the listing here serves as a capsule and a supplement. To curtail
+# redundancy, the statements in the following collation come with only a 
+# modicum of explanation. 
+# 
+# To complement the spartan narrative, however, the script below contains 
+# pointers in the form of headings that correspond to sundry sections within 
+# the report itself. In this way, the interested reader may refer to the 
+# handbook for a full account of the primal issues ranging from the purpose 
+# of the analysis to the logic behind the general layout of the program. 
+#
+#
+#=== Quirks of the Stock Market and Dataset
+# 
+# A big stockpile of data in any domain is apt to contain entries that are 
+# incorrect, incomplete, misleading and/or inconsistent. The general rule 
+# applies to Yahoo Finance, the favorite portal of the investing public. The 
+# story is similar for Finviz, which caters to investors with intermediate 
+# levels of experience.
+#
+# In particular, data providers suffer from a common hang-up in terms of the 
+# inconsistent levels of precision in the factoids they publish. For 
+# instance, the earnings per share (E) tends to feature lower levels of
+# accuracy compared to other properties such as the price (P) or the PE 
+# ratio (PE). Fortunately, there is a simple workaround in this case: we can 
+# derive E by dividing the stock price by the PE ratio reported by the 
+# same source.
+#
+# This and other vital matters are discussed in detail in the primary report 
+# listed at the beginning of this document. An example lies in the logic 
+# behind the motley steps involved in foretelling the price of a stock 
+# through the PEG gauge along with the estimates of earnings growth issued 
+# by financial pundits.
+# 
+# In short, the factoids provided by data sources are often incorrect, 
+# incomplete, and/or deficient in other ways. Regardless of such niceties, 
+# however, the main requirement for a worthwhile assay is the reasonable 
+# premise that the records display a modicum of accuracy. In many cases, 
+# even a fixed and systematic bias to the upside or downside on a 
+# percentage basis may result in final conclusions that prove to be just 
+# as valid. 
+#
+#
+#===========================================================================
+#
+#
+#                            Prep for Startup 
+#                           __________________
+#
+#
+#
+#=== Set the Working Directory
+#
+# The first step is to specify the working directory for the input and output 
+# of data. When the R system starts up, it will select a directory for the 
+# files to be read and/or written. You may check the current location of the 
+# working directory by issuing the following command:
+
+getwd()
+
+# The system will respond with a printout such as the following:
+#
+#    [1] "C:/Users/Myname/Documents"
+#
+# In the foregoing output, the tag of “[1]” denotes the first (and in this 
+# case, the only) item in the response provided by the system. The rest of 
+# the printout conveys the following information: the current directory is 
+# the Documents folder on the C drive for the user called Myname. 
+# 
+# If the folder chosen by the system is a suitable location for your files, 
+# then you may leave the setting alone and move on to the next step. 
+#    
+# On the other hand, suppose that you would like to use a different folder.
+# To illustrate, we will assume that you prefer a directory named Testbed 
+# which you created in advance and placed on the Desktop. In that case, you
+# may issue a suitable instruction such as either of the following commands:
+#
+     setwd("../Desktop/Testbed")
+#    setwd("C:/Users/Myname/Desktop/Testbed")
+#
+# At most, only one of the foregoing commands should be used. In that case, 
+# any unused statement should be preceded by a hash mark (#) in order to 
+# denote it as a comment rather than an instruction to the R system. 
+#
+# After this step, you should confirm any change of location by running the 
+# “getwd()” command once more. From this point onward, we will assume that 
+# the current working directory has been set as you wish.
+#
+#
+#=== Fetch the Data
+# 
+# You may use a Web browser to obtain the requisite data. For the case study 
+# addressed by this program, the data came from Finviz (finviz.com) and Yahoo 
+# Finance (finance.yahoo.com). Further information on the input data is 
+# available in Annex A of the report listed at the top of this document. 
+#
+# The pertinent factoids from Finviz and Yahoo were combined manually in a
+# spreadsheet program. The resulting table was saved to a file called 
+# “StocksPegRuleBud.csv” then emplaced in the current working directory.
+#    
+# At this juncture, the data required has been combined and saved as a file 
+# in the chosen directory. The next step is to load the dataset into the R 
+# system.
+#
+#
+#=== Read in the Data
+#
+# After returning to the R platform, you may access the newborn file located 
+# in the working directory. The contents of this file should be read into a 
+# data frame called Raw. The latter name features an initial capital letter 
+# to serve as a mnemonic that the given object is a full-fledged table rather
+# than a simpler construct such as a character string or a numeric vector. 
+#
+# On the other hand, exceptions to the naming convention may arise in the 
+# case of labels assigned by external parties. An example involves the
+# Boolean values of TRUE and FALSE which are built-in primitives of the R
+# system. Another instance concerns the column of stock prices which has been 
+# dubbed as Price by the data provider.
+#
+# A simple way to copy the dataset into the current workspace is to issue the 
+# following command. 
+
+Raw = read.csv("StocksPegRuleBud.csv")
+
+# If the system responds with an error message, the most likely cause is a
+# mismatch between the working directory and the location of the data file.
+# In that case, you should rectify the discrepancy. Depending on 
+# circumstances, the R engine may continue to issue rude messages. If so, 
+# your best bet is to start over; that is, shut down the program then 
+# restart the system. Next, confirm that the steps described in the previous 
+# subsections have been taken properly, including the use of the “setwd()” 
+# command at most once.
+#
+# At this stage, you should confirm that the dataset has been cloned 
+# correctly. You may use the following command to print out the first 
+# half-dozen rows:
+
+head(Raw)
+
+# The entire table is likely to contain only a handful of rows. Even so, 
+# it’s a good practice in general to verify the input by displaying the last 
+# batch of records as well:
+
+tail(Raw)
+
+# By this point, you have copied the contents of the external file into a
+# data frame called Raw then checked the result. You may now move on to 
+# the main task of crunching the numbers.
+#
+#
+#___________________________________________________________________________
+#
+#
+#                               Body of Code
+#                              ______________
+#
+#
+# This section conveys the body of the script behind the report named in the 
+# Meta section at the beginning of this document. The lines of code shown 
+# below, including the output of files, appear for the most part in the 
+# same order as the algorithm presented in the guidebook.
+#
+# By this juncture, you should have taken the leadoff steps described in the 
+# previous section. In that case, the script as a whole represents a coherent 
+# program rather than a haphazard collection of snippets of code. For this 
+# reason, the entire program – including the statements discussed in the Prep
+# section above – may be executed in a single pass from the Editor pane of 
+# the R platform.
+# 
+# As the program winds down, it generates a chain of prices on a monthly 
+# basis for each of the stocks named in the input file. The upshot is a 
+# matrix wherein each column contains the sequence of target prices for the 
+# corresponding stock. 
+#
+# In certain cases, the price matrix may itself be the desired output. In 
+# other cases, though, the final objective might be the market value of each 
+# firm as a function of time. For the latter goal, an additional step is 
+# required to convert the matrix of stock prices into an array of market 
+# caps.
+#
+# The latter matrix is then augmented by a column of dates to serve as an 
+# index for the rows. Finally, the resulting data frame is saved into an 
+# external file titled, “StocksPegRuleCast.csv”. This is the basic form 
+# of the final table.
+#
+# In addition, the same information is packaged into an elongated layout 
+# known as a “stacked” form then printed out. Either the basic form of the 
+# table or the stacked version may be apropos depending on the subsequent 
+# software used in analyzing the output or plotting the result. 
+#
+# To round up, the script below underpins the guidebook. For each segment of 
+# the program, you should refer to the corresponding section of the tutorial 
+# for a detailed explanation of the motive for the code as well as other 
+# vital matters such as the interpretation of the results.
+#
+#
+#---------------------------------------------------------------------------
+
+
+
+####  Code for Number Crunching #### 
+
+
+
+#=== Tweaking the Input Data
+
+# The input dataset contains information on a handful of attributes - such 
+# as the price and earnings - for a multiplicity of stocks. These factoids 
+# are processed as a function of time in order to yield the primal outcome: 
+# a table of share prices by date and stock. 
+# 
+# On the other hand, this program goes a step further and figures out the 
+# market caps corresponding to the matrix of share prices. In case the user 
+# prefers, it would be a simple matter to modify the program to print out 
+# the table of share prices in addition to, or instead of, the market caps.
+#
+# As a mainstay for the program, we could construct a single vessel to hold 
+# the intermediate values of share prices and other attributes. For this 
+# purpose, the obvious choice lies in a 3-dimensional array defined by the 
+# axes of time, stocks, and attributes. 
+#
+# On one hand, the monolithic approach may seem like an elegant solution at 
+# a conceptual level. On the other hand, the setup would be more convoluted 
+# than is necessary.
+#
+# From a pragmatic stance, a better approach is to create a handful of 
+# 2-dimensional tables. In that case, each matrix represents a single 
+# attribute. Within a given array, each column conveys the chain of prices 
+# or some other trait for a single stock as a function of time. This 
+# approach results in plainer code along with greater clarity for the human 
+# reader in grasping the purpose as well as the mechanics of each operation 
+# in crunching the data.
+#
+# At the outset, each column of the Raw table represents a feature or face. 
+# An example concerns a list of stock symbols or a bunch of share prices. 
+#
+# We should note here that the R system has renamed some of the columns in 
+# creating the Raw table. An example involves the PE ratio, which is labeled 
+# as “P/E” in the input file. However, any attempt to access such a column 
+# by using its original name would induce the system to parse the character 
+# string as the command “P/E”; that is, an instruction to divide some object 
+# named P by another called E. To prevent such a foul-up, the system has 
+# automatically replaced the slash sign (/) by a period. As a result, the 
+# new name of the column is “P.E”.
+#
+# To cite another example, any attempt to access a column titled 
+# “EPS next 5Y” could be confusing due to the presence of blank characters 
+# within the label. To forestall such a problem, the system has at the 
+# outset converted each blank space within the column name to a period so 
+# that the new label is “EPS.next.5Y”.
+
+
+## Start with some housekeeping tasks
+
+# The following decree will simplify access later on to the columns of the 
+# Raw table.
+
+attach(Raw)
+
+# Henceforth we may – for instance – refer to the Price column of the 
+# Raw array as simply “Price” rather than “Raw$Price”.
+
+
+# One of the columns of Raw is named “PEG”. However, we wish to use the 
+# latter label later on to denote an entire matrix. So we will convert 
+# the name “PEG” to “Peg” in the Raw array.
+#
+# To this end, we first find the number of the column named “PEG”. That way, 
+# the change of name can handle similar tables in the future where the 
+# “PEG” column might show up in a different position from that of the current 
+# dataset. 
+
+colnum = match("PEG", names(Raw))  
+names(Raw)[colnum] = "Peg" 
+
+# The first command above stores the number of the column named “PEG” in  
+# a scalar called “colnum”. The second decree changes the corresponding 
+# label to “Peg”.
+
+
+
+#=== Define a few parameters
+
+# Find the number of stocks – defined by the number of rows – in Raw.
+
+nSt = nrow(Raw)
+
+
+# The first row of each matrix contains the list of initial values at time 
+# t = 0. Let “finis” denote the last slot at the end of the 5-year span. The
+# windup occurs at t = 60 months which actually takes up row 61. 
+
+finis = 61
+
+# We will use this factoid later on.
+
+
+
+#=== Get the Initial Value of Market Cap
+
+# Form a vector named “cap” to hold the total worth of every firm. 
+
+cap = Market.Cap
+
+# Each entry is apt to contain an extraneous character. An example involves 
+# the string “123.45B” where the letter “B” stands for “billion”. We wish to 
+# discard any such character and convert the remainder to a numeric value 
+# like “123.45”. 
+#
+# We now create a function to remove the wayward letter, and substitute it 
+# with the null string ("").
+
+numCap = function(x) {               # To turn each string into a number.
+  x = sub("B", "", x)                # Remove the letter B.
+}
+
+# The x vector is an argument of “char” class; so we can't convert it to a 
+# numeric type by simply transforming each of its entries into numeric form. 
+# Instead, we first delete the “B” character.
+ 
+cap = numCap(cap)
+
+# Then we transform the entire vector to a numeric class.
+
+cap = as.numeric(cap)
+
+
+
+#=== Load Matrices for Price, etc.
+
+# The pertinent inputs include the share price P at the outset as well as 
+# the earnings E over the past year. The latter timespan is also called the 
+# Trailing Twelve Months (TTM).
+
+# Form a matrix P to contain the price levels as time goes by. Each column 
+# will store the price of a given stock as a function of time. 
+#
+# Meanwhile, the rows of P correspond to the months involved in the planning 
+# window of 5 years. We need 61 rows: one for each month starting from the 
+# initial slot to the final state. For the case study at hand, the readings 
+# begin at the end of January 2021 and run till the close of January 2026. 
+#
+# We recall that “finis” equals the total number of pertinent months, while 
+# nSt denotes the count of stocks in the input file. 
+
+P = matrix(data = 0, nrow = finis, ncol = nSt)
+
+# To form a numeric matrix, we set the initial values to 0 rather than NA in 
+# the foregoing command. We now do likewise for the backward earnings E over 
+# the prior year.
+
+E = matrix(data = 0, nrow = finis, ncol = nSt)
+
+# The setup is similar for the PEG gauge and Market Cap.
+
+PEG = matrix(data = 0, nrow = finis, ncol = nSt)
+Cap = matrix(data = 0, nrow = finis, ncol = nSt)
+
+
+# Next, we assign names to the columns of the 4 matrices above. Each column 
+# gets the ticker symbol for a given stock. 
+
+colnames(P) = Ticker
+colnames(E) = Ticker
+colnames(PEG) = Ticker
+colnames(Cap) = Ticker
+
+
+# We want to copy values from some columns of Raw to the first row of the 
+# corresponding matrix. To keep things simple, we first copy each column 
+# into a vector as follows.
+
+p   = Price
+pe  = P.E
+peg = Raw$Peg
+
+# Due to a glitch in the R system, we need to write out “peg = Raw$Peg”
+# in the last statement above rather than use the shortcut of “peg = Peg”.
+
+# To bring up a different issue, an entry within each vector might contain an 
+# apostrophe (') at the beginning of the character string. In that case, the 
+# extraneous character should be removed. For instance, an input such as 
+# “'12.34” must be converted into “12.34”. 
+
+p   = sub("\'", "", p)
+pe  = sub("\'", "", pe)
+
+# We now transform the following vectors from the “char” class to “numeric” 
+# form.
+
+p   = as.numeric(p)
+pe  = as.numeric(pe)
+peg = as.numeric(peg)
+
+
+# We use the foregoing results to initialize the first row of the P and 
+# Cap matrices:
+
+P[1, ]   = p
+Cap[1, ] = cap
+
+
+# At the outset – corresponding to the first row – the values in P and PE are 
+# apt to have greater precision than the values in the earnings vector E. To 
+# counteract the loss of precision to some degree, we derive each entry in E 
+# as the quotient of the pertinent values in P and PE.
+
+E[1, ] = p / pe 
+
+
+# We will need the number of shares in order to update the market 
+# capitalization at each slot (month). The total worth of a company equals 
+# the price of the stock times the number of shares. For this reason, we can 
+# discern the corresponding number of shares for the stocks in the following 
+# way: 
+
+nShares = cap / p 
+
+
+
+#=== Get Growth Rates and Scale Factors
+
+# Form the vector g to hold the growth estimates for the stocks. Each entry 
+# denotes the rate of growth per year on average for a given stock over the 
+# next 5 years. 
+
+g = EPS.next.5Y
+
+# The entries may contain a couple of extraneous characters. An example
+# concerns an apostrophe (') at the beginning, or a percent sign (%) at the
+# end. We want to remove such characters and convert the result to a 
+# numeric value. For instance, an input such as “'12.34%” is transformed
+# into the number “0.1234”. 
+#
+# To remove any apostrophe, we substitute it with the null string ("").
+# Then we discard the percent sign if applicable. Either way, we obtain the 
+# corresponding number.
+
+numGrowth = function(x) {                        # Turn each string to a num.
+  x = sub("\'", "", x)                           # Remove any apostrophes.
+  for(i in 1:nSt) {                              # For each stock:
+    if(grepl("%", x[i], fixed=TRUE)) {           # if "%" sign exists, then 
+      x[i] = as.numeric(sub("%", "", x[i]))/100  # remove it & turn percent  
+    }                                            # to a decimal.
+  }
+  y = as.numeric(x)                              # Convert entire vector 
+  return(y)                                      # to numeric class.
+}
+
+# In the routine above, the “if” condition only takes a scalar argument;
+# hence the “for” loop. Moreover, the x vector is a “char” class; so we can't 
+# convert it to a numeric type by simply transforming each of its entries 
+# into numeric form. So we transform the entire vector to a numeric class
+# and call it the y vector which is then returned from the function.
+ 
+g = numGrowth(g)
+
+
+## Scaling Factors
+
+# Let f denote the scale factor for a whole year:
+
+f = 1 + g   
+
+# In that case, the scale factor (fm) on a monthly basis is given by:
+
+fm = f^(1/12)
+
+# We will use this vector of dilation factors later on to adjust the 
+# earnings E by month.
+
+
+
+#=== Form the PEG Matrix
+
+# Initialize the first row of PEG.
+
+PEG[1, ] = peg
+
+
+## Drift of the PEG Score
+
+# We assume that the PEG score for any stock will over the course of a 
+# decade drift to the average value for the ensemble at the outset. For 
+# the sake of robustness, we take the average to be the Olympic mean; that
+# is, the trimmed mean given by the removal of the minimum and maximum 
+# values. We find the Olympic mean as:
+
+olyMean = ( sum(PEG[1, ]) - max(PEG[1, ]) - min(PEG[1, ]) ) / (nSt - 2)
+
+# Let pegEnd = target value of PEG in 5 years. The target for each stock 
+# lies halfway toward its olyMean:
+
+pegEnd = (PEG[1, ] + olyMean) / 2
+
+# We assume that the PEG score for each stock drifts at a steady rate toward 
+# its pegEnd value over the span of 60 months. In that case, the decrease 
+# for each stock at each step is one-sixtieth of the gap between the initial 
+# and target values:
+
+slide = (pegEnd - PEG[1, ]) / 60
+
+
+# At each step (month), the row vector of PEG values by stock is revised 
+# within a loop:
+
+for(i in 1:60) {
+   PEG[i+1, ] = PEG[i, ] + slide
+}
+
+# The PEG matrix now reflects the steady slide toward the Olympic mean. For 
+# each stock, the final value at the end of 5 years lies halfway toward the 
+# ultimate destination (which would take 10 years to reach).
+
+
+
+#=== Fill Out the Earnings Matrix
+
+# At each step, the earnings E per stock changes by the monthly scale in the 
+# form of fm. A couple of sections earlier, we already stored the initial 
+# tally of earnings for each stock in the first row of the E matrix. We now 
+# calculate the earnings for the other slots up to Month 60 which corresponds 
+# to row 61. 
+
+for(i in 1:60) {
+   E[i+1, ] = fm * E[i, ] 
+}
+
+# The matrix E is now fully armed.
+
+
+
+#=== Growth in Percent 
+
+# At this juncture, the growth rate g is a vector wherein each entry is 
+# expressed as a fraction rather than a percentage. So we convert the values 
+# into percentage units.
+
+gp = 100 * g
+
+# We now have all the components needed to calculate the price matrix.
+
+
+
+#=== Intermediate Values of Price 
+
+# For starters, we recall that the PEG score is defined as follows.
+#
+#   PEG = PE/G = [P/E]/G
+#
+# We take the first and last terms in the formula above, and rearrange the 
+# components to obtain:
+#
+#   P = PEG * G * E
+#
+# We will apply this formula to each slot (month) in turn.
+
+# We recall that the first row of each matrix contains the readings at the 
+# outset. The derived values start with t = 1 month which is stored in the 
+# second row. Moreover, the subsequent slots run up to Month 60; the latter 
+# is encoded in row 61. The terminal number resides in the “finis” variable. 
+# So we can obtain the values for the price matrix as follows.
+
+for(i in 2:finis) {
+   P[i, ] = PEG[i, ] * gp * E[i, ] 
+}
+
+# We could print out the P matrix if our goal is to discern the price of each
+# stock as a function of time.
+
+# However, suppose that we prefer instead to obtain the market cap for each 
+# stock over time. In that case, we just need to multiply each entry in the 
+# price matrix by the number of shares. We can skip the first row since the 
+# market cap at the outset has already been loaded into the Cap matrix.
+
+for(i in 2:finis) {
+   Cap[i, ] = P[i, ] * nShares
+}
+
+
+# We now have all the factoids we need. The next step is to form a series of 
+# dates to serve as the index for the rows of the Cap matrix.
+
+
+
+#=== Form a List of Dates
+
+# The timeline covers 5 years starting from the end of January 2021. As a 
+# result, the dates comprise 61 months running till the end of January 2026.
+
+dates = seq(from=as.Date('2021-01-01'), to=as.Date('2026-01-01'), by='month')
+
+
+# We may shorten the dates by deleting the portion that denotes the first 
+# day of each month. In that case, each entry specifies only the year and 
+# month.
+
+months = format(as.Date(dates), "%Y-%m")
+
+# Our next step is to combine the chain of dates with the Market Cap matrix.
+
+
+
+#=== Wrap-up
+
+# Create a mold to hold the full dataset.
+
+Mold = data.frame(months, Cap)
+
+# Check whether the results are as expected.
+
+str(Mold)
+head(Mold) ; tail(Mold)
+
+
+# Dispense the table of market caps for the entire timeline.
+
+write.csv(Mold, file = "StocksPegRuleCast.csv")
+
+# In the output file, the first column of the table is an index running from 
+# 1 to “finis”. The second column denotes the month, ranging from 2021-01
+# to 2026-01. Each of the remaining columns bears the Market Cap by month 
+# for a given stock.
+#
+# This layout works well for a spreadsheet program such as Microsoft Excel,  
+# Google Sheets, or OpenOffice Calc. The latter program was in fact used to 
+# generate the charts in the guidebook listed near the beginning of the 
+# current document. 
+#
+# On the other hand, the final results may have to take a different form 
+# depending on the software to be used in the next phase of the 
+# investigation. For this reason, we will also create a table with an 
+# alternative layout. 
+
+
+## Stacked Columns
+
+# In certain cases, the software utility may require the attribute of 
+# interest – such as the Market Cap – to be gathered together and lined 
+# up in a single column. This might occur, for instance, in a program for 
+# data visualization or statistical analysis. In squished layout, the 
+# pertinent stocks are specified in a separate column. To wit, each row 
+# includes the name of the stock associated with the Market Cap and the 
+# pertinent date. 
+# 
+# To this end, we first convert the Cap matrix into a data frame. 
+
+CapDF = data.frame(Cap)
+
+# We now transform the newborn object from a compact, wide table into a 
+# tall, slender form.
+
+CapSlim = stack(CapDF)
+
+
+# Next we generate a table that includes a vector of dates to serve as an 
+# index for the rows. The elements of the “months” vector are recycled as 
+# needed to cover all the rows in CapSlim. 
+
+MoldSlim = data.frame(months, CapSlim)
+
+
+# Give the columns some meaningful names.
+
+colnames(MoldSlim) = c('Month', 'Market Cap', 'Stock')
+
+
+# Check whether the results are as expected.
+
+str(MoldSlim)
+head(MoldSlim) ; tail(MoldSlim)
+
+
+# Print out the table of stacked columns. 
+
+write.csv(MoldSlim, file = "StocksPegRuleCast-StackedData.csv")
+
+# The output file contains an elongated table of the Market Cap for each 
+# month and stock. This layout befits certain types of applications. An 
+# example involves a visualization program fielded by Tableau Software 
+# (tableau.com). Another sample concerns the graphic commands in the 
+# “ggplot2” package within the R system. 
+#
+# From a broader stance, though, a methodic survey of plotting functions is 
+# a peripheral task that lies beyond the scope of the current program along 
+# with the attendant guidebook. For this reason, we will forgo any further 
+# discussion of the subject.
+
+
+###############################  End of Code  ###############################
